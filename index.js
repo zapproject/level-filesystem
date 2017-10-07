@@ -217,6 +217,18 @@ module.exports = function(db, opts) {
 		});
 	};
 
+	fs.writeFileSync = function(key, data, opts) {
+		var lock = true;
+		var err = null;
+
+		fs.writeFile(key, data, opts, function (_err) {
+			err = _err;
+			lock = false;
+		});
+
+		if (err) throw err;
+	};
+
 	fs.appendFile = function(key, data, opts, cb) {
 		if (typeof opts === 'function') return fs.appendFile(key, data, null, opts);
 		if (typeof opts === 'string') opts = {encoding:opts};
@@ -278,6 +290,25 @@ module.exports = function(db, opts) {
 			});
 		});
 	};
+
+	fs.readFileSync = function(key, opts) {
+		var err = null;
+		var data = null;
+		var lock = true;
+
+		this.readFile(key, opts, function (_err, _data) {
+			err = _err;
+			data = _data;
+
+			lock = false;
+		});
+
+		while ( lock ) {}
+
+		if (err) throw err;
+
+		return data;
+	}
 
 	fs.createReadStream = function(key, opts) {
 		if (!opts) opts = {};
