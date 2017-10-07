@@ -99,6 +99,20 @@ module.exports = function(db, opts) {
 		});
 	};
 
+	fs.existsSync = function(key) {
+		var lock = true;
+		var result;
+
+		fs.exists(key, function (_result) {
+			result = _result;
+			lock = false;
+		});
+
+		while ( lock ) {}
+
+		return result;
+	}
+
 	var chmod = function(key, lookup, mode, cb) {
 		if (!cb) cb = noop;
 		lookup(key, function(err, stat, key) {
